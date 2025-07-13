@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Random GitHub Repo Star",
+  "version": "1.0",
+  "description": "Search random GitHub repos and auto star them.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": ["storage", "scripting", "tabs"],
+  "host_permissions": ["https://api.github.com/*", "https://github.com/*"]
+}
