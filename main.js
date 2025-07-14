@@ -7,11 +7,6 @@ const checkboxSelectAllRepo = document.getElementById("selectAll");
 var listUnChecked = [];
 let playStarring = false;
 let rowProcessing = 0;
-let delayEveryRequest = 2; // seconds
-
-document.querySelector(
-  ".notify-open-tab-repo"
-).innerHTML = `Open new tab for a repo every ${delayEveryRequest}s`;
 
 submitBtn.onclick = async (event) => {
   event.preventDefault();
@@ -72,6 +67,14 @@ submitBtn.onclick = async (event) => {
 
 starAllBtn.onclick = async () => {
   setStatePlayStarring(true);
+
+  let delayEveryRequest = parseFloat(document.getElementById("delay").value);
+  if (isNaN(delayEveryRequest) || delayEveryRequest < 1) delayEveryRequest = 2;
+
+  document.querySelector(
+    ".notify-open-tab-repo"
+  ).innerHTML = `Open new tab for a repo every ${delayEveryRequest}s`;
+
   const checkboxes = document.querySelectorAll(".repo-checkbox");
   const checkboxesChecked = Array.from(checkboxes)
     .filter((checkbox) => checkbox.checked)

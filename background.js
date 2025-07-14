@@ -6,9 +6,21 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "open_tab") {
-    chrome.tabs.create({
-      url: message.url,
-      active: false,
-    });
+    const repoUrl = message.url;
+    const senderTab = sender.tab;
+    const senderWindowId = senderTab ? senderTab.windowId : null;
+
+    if (senderWindowId !== null) {
+      chrome.tabs.create({
+        url: repoUrl,
+        active: false,
+        windowId: senderWindowId,
+      });
+    } else {
+      chrome.tabs.create({
+        url: repoUrl,
+        active: false,
+      });
+    }
   }
 });
