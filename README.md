@@ -2,4 +2,4 @@
 
 ## 📸 Screenshot
 
-<img src="/assets/preview.png" width="700" alt="Preview Auto Star GitHub">
+<img src="/assets/preview.png" width="1000" alt="Preview Auto Star GitHub">
