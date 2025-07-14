@@ -19,7 +19,6 @@ submitBtn.onclick = async () => {
   repoTableBody.innerHTML = "";
   statusEl.textContent = "Fetching repos...";
 
-  const token = document.getElementById("token").value.trim();
   const keyword = document.getElementById("keyword").value.trim();
   let page = parseInt(document.getElementById("page").value);
   let count = parseInt(document.getElementById("count").value);
@@ -31,10 +30,7 @@ submitBtn.onclick = async () => {
 
   try {
     const res = await fetch(
-      `https://api.github.com/search/repositories?q=${query}&per_page=${count}&page=${page}`,
-      {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
+      `https://api.github.com/search/repositories?q=${query}&per_page=${count}&page=${page}`
     );
 
     const data = await res.json();
