@@ -13,7 +13,9 @@ document.querySelector(
   ".notify-open-tab-repo"
 ).innerHTML = `Open new tab for a repo every ${delayEveryRequest}s`;
 
-submitBtn.onclick = async () => {
+submitBtn.onclick = async (event) => {
+  event.preventDefault();
+
   playStarring = false;
   rowProcessing = 0;
   repoTableBody.innerHTML = "";
