@@ -60,7 +60,7 @@ submitBtn.onclick = async (event) => {
 
     statusEl.textContent = "Repo list ready.";
   } catch (err) {
-    console.error(err);
+    console.log(err);
     statusEl.textContent = "Failed to fetch repositories.";
   }
 };

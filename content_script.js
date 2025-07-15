@@ -1,10 +1,4 @@
-let timeout = 30;
-let responded = false;
-
 const response = (status) => {
-  if (responded) return;
-  responded = true;
-
   chrome.runtime.sendMessage(
     {
       type: "star_result",
@@ -16,11 +10,6 @@ const response = (status) => {
     }
   );
 };
-
-setTimeout(() => {
-  console.log(`Timeout after ${timeout}s`);
-  response(false);
-}, timeout * 1000);
 
 (async () => {
   const params = new URLSearchParams(window.location.search);

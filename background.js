@@ -1,3 +1,6 @@
+const timeout = 30;
+const pendingTabs = {};
+
 chrome.action.onClicked.addListener((tab) => {
   chrome.tabs.create({
     url: chrome.runtime.getURL("index.html"),
@@ -10,27 +13,42 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     const senderTab = sender.tab;
     const senderWindowId = senderTab ? senderTab.windowId : null;
 
-    console.log(repoUrl, senderTab, senderWindowId);
+    console.log("Opening repo:", repoUrl);
 
-    if (senderWindowId !== null) {
-      try {
-        await createTabSafe({
-          url: repoUrl,
-          active: false,
-          windowId: senderWindowId,
+    try {
+      const tab = await createTabSafe({
+        url: repoUrl,
+        active: false,
+        ...(senderWindowId ? { windowId: senderWindowId } : {}),
+      });
+
+      const timeoutId = setTimeout(() => {
+        console.log(`Timeout: No response from tab ${tab.id}`);
+        chrome.runtime.sendMessage({
+          type: "star_result",
+          success: false,
+          repo: new URL(repoUrl).pathname.slice(1),
         });
-      } catch (err) {
-        console.error("❌ Failed to create tab:", err.message);
-      }
-    } else {
-      try {
-        await createTabSafe({
-          url: repoUrl,
-          active: false,
-        });
-      } catch (err) {
-        console.error("❌ Failed to create tab:", err.message);
-      }
+        delete pendingTabs[tab.id];
+      }, timeout * 1000);
+
+      pendingTabs[tab.id] = timeoutId;
+    } catch (err) {
+      console.log("Failed to create tab:", err.message);
+      chrome.runtime.sendMessage({
+        type: "star_result",
+        success: false,
+        repo: new URL(repoUrl).pathname.slice(1),
+      });
+    }
+  }
+
+  if (message.type === "star_result") {
+    const tabId = sender.tab?.id;
+    if (tabId && pendingTabs[tabId]) {
+      clearTimeout(pendingTabs[tabId]); // Cancel timeout
+      delete pendingTabs[tabId];
+      console.log(`Received star result from tab ${tabId}:`, message.success);
     }
   }
 });
