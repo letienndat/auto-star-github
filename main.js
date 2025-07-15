@@ -4,14 +4,36 @@ const stopStar = document.getElementById("stopStar");
 const repoTableBody = document.querySelector("#repoTable tbody");
 const statusEl = document.getElementById("status");
 const checkboxSelectAllRepo = document.getElementById("selectAll");
+const totalRowSelected = document.getElementById("totalRowSelected");
+const textProcess = document.getElementById("process");
+const textSuccess = document.getElementById("success");
+const textFail = document.getElementById("fail");
 var listUnChecked = [];
 let playStarring = false;
 let rowProcessing = 0;
+let rowCanProcess = 0;
+let rowSuccess = 0;
+let rowFail = 0;
+const rowProcessed = () => {
+  return rowSuccess + rowFail;
+};
+
+const updateUIProcess = (reset = false) => {
+  if (reset) {
+    rowCanProcess = 0;
+    rowSuccess = 0;
+    rowFail = 0;
+  }
+  totalRowSelected.textContent = rowCanProcess;
+  textProcess.textContent = rowProcessed();
+  textSuccess.textContent = rowSuccess;
+  textFail.textContent = rowFail;
+};
 
 submitBtn.onclick = async (event) => {
   event.preventDefault();
 
-  playStarring = false;
+  setStatePlayStarring(false);
   rowProcessing = 0;
   repoTableBody.innerHTML = "";
   statusEl.textContent = "Fetching repos...";
@@ -66,6 +88,19 @@ submitBtn.onclick = async (event) => {
 };
 
 starAllBtn.onclick = async () => {
+  updateUIProcess(true);
+
+  const checkboxes = document.querySelectorAll(".repo-checkbox");
+  const checkboxesChecked = Array.from(checkboxes)
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => checkbox.dataset.name);
+  rowProcessing = checkboxesChecked.reduce((a, b) => a + 1, 0);
+  rowCanProcess = rowProcessing;
+
+  if (rowProcessing == 0) {
+    return;
+  }
+
   setStatePlayStarring(true);
 
   let delayEveryRequest = parseFloat(document.getElementById("delay").value);
@@ -75,11 +110,7 @@ starAllBtn.onclick = async () => {
     ".notify-open-tab-repo"
   ).innerHTML = `Open new tab for a repo every ${delayEveryRequest}s`;
 
-  const checkboxes = document.querySelectorAll(".repo-checkbox");
-  const checkboxesChecked = Array.from(checkboxes)
-    .filter((checkbox) => checkbox.checked)
-    .map((checkbox) => checkbox.dataset.name);
-  rowProcessing = checkboxesChecked.reduce((a, b) => a + 1, 0);
+  updateUIProcess();
 
   Array.from(document.getElementsByTagName("tr")).forEach((row) => {
     row.classList.remove("table-warning", "table-success", "table-danger");
@@ -155,7 +186,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { repo, success } = message;
 
     rowProcessing -= 1;
+    rowSuccess += success ? 1 : 0;
+    rowFail += !success ? 1 : 0;
     console.log(repo, rowProcessing, success);
+    updateUIProcess();
     updateUIByRowProcessing();
 
     const checkbox = document.querySelector(
@@ -178,6 +212,7 @@ const updateUIByRowProcessing = () => {
   if (rowProcessing == 0) {
     playStarring = false;
     statusEl.textContent = "✅ Auto star completed.";
+    console.log("✅ Auto star completed.");
     setStatePlayStarring(false);
   }
 };

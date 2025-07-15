@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       });
 
       const timeoutId = setTimeout(() => {
-        console.log(`Timeout: No response from tab ${tab.id}`);
+        console.log(`Timeout: No response from repo ${repoUrl}, tab ${tab.id}`);
 
         chrome.runtime.sendMessage({
           type: "star_result",
