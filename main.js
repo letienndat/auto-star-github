@@ -5,12 +5,14 @@ const repoTableBody = document.querySelector("#repoTable tbody");
 const statusEl = document.getElementById("status");
 const checkboxSelectAllRepo = document.getElementById("selectAll");
 const totalRowSelected = document.getElementById("totalRowSelected");
+const textPending = document.getElementById("pending");
 const textProcess = document.getElementById("process");
 const textSuccess = document.getElementById("success");
 const textFail = document.getElementById("fail");
 var listUnChecked = [];
 let playStarring = false;
 let rowProcessing = 0;
+let rowPending = 0;
 let rowCanProcess = 0;
 let rowSuccess = 0;
 let rowFail = 0;
@@ -20,11 +22,13 @@ const rowProcessed = () => {
 
 const updateUIProcess = (reset = false) => {
   if (reset) {
+    rowPending = 0;
     rowCanProcess = 0;
     rowSuccess = 0;
     rowFail = 0;
   }
   totalRowSelected.textContent = rowCanProcess;
+  textPending.textContent = rowPending;
   textProcess.textContent = rowProcessed();
   textSuccess.textContent = rowSuccess;
   textFail.textContent = rowFail;
@@ -126,6 +130,9 @@ starAllBtn.onclick = async () => {
     const repoName = checkbox.dataset.name;
     statusEl.textContent = `⭐ Opening and star repo ${repoName}`;
 
+    rowPending += 1;
+    updateUIProcess();
+
     // Open tab with auto_star query param
     chrome.runtime.sendMessage({
       type: "open_tab",
@@ -185,6 +192,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "star_result" && playStarring) {
     const { repo, success } = message;
 
+    rowPending -= 1;
     rowProcessing -= 1;
     rowSuccess += success ? 1 : 0;
     rowFail += !success ? 1 : 0;
