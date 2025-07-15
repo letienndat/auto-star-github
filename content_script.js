@@ -1,28 +1,26 @@
+let timeout = 30;
+let responded = false;
+
 const response = (status) => {
-  if (status) {
-    chrome.runtime.sendMessage(
-      {
-        type: "star_result",
-        success: true,
-        repo: window.location.pathname.slice(1),
-      },
-      () => {
-        window.close();
-      }
-    );
-  } else {
-    chrome.runtime.sendMessage(
-      {
-        type: "star_result",
-        success: false,
-        repo: window.location.pathname.slice(1),
-      },
-      () => {
-        window.close();
-      }
-    );
-  }
+  if (responded) return;
+  responded = true;
+
+  chrome.runtime.sendMessage(
+    {
+      type: "star_result",
+      success: status,
+      repo: window.location.pathname.slice(1),
+    },
+    () => {
+      window.close();
+    }
+  );
 };
+
+setTimeout(() => {
+  console.log(`Timeout after ${timeout}s`);
+  response(false);
+}, timeout * 1000);
 
 (async () => {
   const params = new URLSearchParams(window.location.search);
@@ -47,21 +45,26 @@ const response = (status) => {
   const authToken = tokenInput.value;
   const action = form.getAttribute("action");
 
-  const res = await fetch(action, {
-    method: "POST",
-    headers: {
-      "x-requested-with": "XMLHttpRequest",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `authenticity_token=${encodeURIComponent(authToken)}`,
-    credentials: "same-origin",
-  });
+  try {
+    const res = await fetch(action, {
+      method: "POST",
+      headers: {
+        "x-requested-with": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `authenticity_token=${encodeURIComponent(authToken)}`,
+      credentials: "same-origin",
+    });
 
-  if (res.ok) {
-    console.log("✅ Repo starred.");
-    response(true);
-  } else {
-    console.log("❌ Star failed.");
+    if (res.ok) {
+      console.log("✅ Repo starred.");
+      response(true);
+    } else {
+      console.log("❌ Star failed.");
+      response(false);
+    }
+  } catch (err) {
+    console.log("❌ Network error:", err);
     response(false);
   }
 })();

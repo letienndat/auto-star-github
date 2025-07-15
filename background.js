@@ -4,23 +4,46 @@ chrome.action.onClicked.addListener((tab) => {
   });
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === "open_tab") {
     const repoUrl = message.url;
     const senderTab = sender.tab;
     const senderWindowId = senderTab ? senderTab.windowId : null;
 
+    console.log(repoUrl, senderTab, senderWindowId);
+
     if (senderWindowId !== null) {
-      chrome.tabs.create({
-        url: repoUrl,
-        active: false,
-        windowId: senderWindowId,
-      });
+      try {
+        await createTabSafe({
+          url: repoUrl,
+          active: false,
+          windowId: senderWindowId,
+        });
+      } catch (err) {
+        console.error("❌ Failed to create tab:", err.message);
+      }
     } else {
-      chrome.tabs.create({
-        url: repoUrl,
-        active: false,
-      });
+      try {
+        await createTabSafe({
+          url: repoUrl,
+          active: false,
+        });
+      } catch (err) {
+        console.error("❌ Failed to create tab:", err.message);
+      }
     }
   }
 });
+
+function createTabSafe(createOptions) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create(createOptions, (tab) => {
+      const err = chrome.runtime.lastError;
+      if (err) {
+        reject(err);
+      } else {
+        resolve(tab);
+      }
+    });
+  });
+}
