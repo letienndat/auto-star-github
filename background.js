@@ -24,11 +24,25 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
       const timeoutId = setTimeout(() => {
         console.log(`Timeout: No response from tab ${tab.id}`);
+
         chrome.runtime.sendMessage({
           type: "star_result",
           success: false,
           repo: new URL(repoUrl).pathname.slice(1),
         });
+
+        // Close tab timeout
+        chrome.tabs.remove(tab.id, () => {
+          if (chrome.runtime.lastError) {
+            console.warn(
+              "Failed to close tab:",
+              chrome.runtime.lastError.message
+            );
+          } else {
+            console.log("Closed tab due to timeout");
+          }
+        });
+
         delete pendingTabs[tab.id];
       }, timeout * 1000);
 
