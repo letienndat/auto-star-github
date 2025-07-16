@@ -16,9 +16,7 @@ let rowPending = 0;
 let rowCanProcess = 0;
 let rowSuccess = 0;
 let rowFail = 0;
-const rowProcessed = () => {
-  return rowSuccess + rowFail;
-};
+const rowProcessed = () => rowSuccess + rowFail;
 
 const updateUIProcess = (reset = false) => {
   if (reset) {
@@ -130,15 +128,14 @@ starAllBtn.onclick = async () => {
     const repoName = checkbox.dataset.name;
     statusEl.textContent = `⭐ Opening and star repo ${repoName}`;
 
-    rowPending += 1;
-    updateUIProcess();
-
     // Open tab with auto_star query param
     chrome.runtime.sendMessage({
       type: "open_tab",
       url: `https://github.com/${repoName}?auto_star=1`,
     });
 
+    rowPending += 1;
+    updateUIProcess();
     row.classList.remove("table-success", "table-danger");
     row.classList.add("table-warning");
 
