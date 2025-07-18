@@ -15,6 +15,7 @@ let listUnChecked = [];
 let repoFails = [];
 let playStarring = false;
 let playRetrying = false;
+let playOneRetrying = false;
 let rowProcessing = 0;
 let rowPending = 0;
 let rowCanProcess = 0;
@@ -227,7 +228,7 @@ retryAllBtn.addEventListener("click", async () => {
 
 const retryRow = (repo) => {
   setStatePlayStarring(true);
-  playRetrying = true;
+  playOneRetrying = true;
   statusEl.textContent = `⭐ Reopening and star repo ${repo}`;
 
   rowProcessing += 1;
@@ -291,11 +292,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "star_result" && playStarring) {
     const { repo, success, retry } = message;
 
-    if (!success && !playRetrying) {
+    if (!success && (!playRetrying || playOneRetrying)) {
       repoFails.push(repo);
     } else if (success && retry) {
       repoFails = repoFails.filter((item) => item != repo);
     }
+    playOneRetrying = false;
 
     rowPending -= 1;
     rowProcessing -= 1;
