@@ -22,6 +22,27 @@ let rowSuccess = 0;
 let rowFail = 0;
 const rowProcessed = () => rowSuccess + rowFail;
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const setStateSearching = (status) => {
+  isSearching = status;
+  submitBtn.disabled = status;
+};
+
+const setStatePlayStarring = (status) => {
+  playStarring = status;
+
+  if (playStarring) {
+    starAllBtn.classList.add("disabled");
+    stopStar.classList.remove("disabled");
+  } else {
+    starAllBtn.classList.remove("disabled");
+    stopStar.classList.add("disabled");
+  }
+};
+
 const updateUIProcess = (reset = false) => {
   if (reset) {
     rowPending = 0;
@@ -190,7 +211,7 @@ starAllBtn.onclick = async () => {
 };
 
 retryAllBtn.addEventListener("click", async () => {
-  setStatePlayStarring(true)
+  setStatePlayStarring(true);
   playRetrying = true;
   retryAllBtn.disabled = true;
   blockAllBtnRetry(true);
@@ -205,7 +226,7 @@ retryAllBtn.addEventListener("click", async () => {
 });
 
 const retryRow = (repo) => {
-  setStatePlayStarring(true)
+  setStatePlayStarring(true);
   playRetrying = true;
   statusEl.textContent = `⭐ Reopening and star repo ${repo}`;
 
@@ -255,23 +276,6 @@ checkboxSelectAllRepo.addEventListener("change", (e) => {
     cb.checked = e.target.checked;
   });
 });
-
-const setStateSearching = (status) => {
-  isSearching = status
-  submitBtn.disabled = status
-}
-
-const setStatePlayStarring = (status) => {
-  playStarring = status;
-
-  if (playStarring) {
-    starAllBtn.classList.add("disabled");
-    stopStar.classList.remove("disabled");
-  } else {
-    starAllBtn.classList.remove("disabled");
-    stopStar.classList.add("disabled");
-  }
-};
 
 const tapCheckbox = (e) => {
   if (!e.checked) {
@@ -350,7 +354,3 @@ const updateUIByRowProcessing = () => {
     setStatePlayStarring(false);
   }
 };
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

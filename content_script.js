@@ -4,7 +4,7 @@ const response = (status, retry) => {
       type: "star_result",
       success: status,
       repo: window.location.pathname.slice(1),
-      retry
+      retry,
     },
     () => {
       window.close();
@@ -17,7 +17,7 @@ const response = (status, retry) => {
   if (params.get("auto_star") !== "1") {
     return;
   }
-  const retry = params.get("retry") === "true" ? true : false
+  const retry = params.get("retry") === "true" ? true : false;
 
   const form = document.querySelector('form[action$="/star"]');
   if (!form) {
