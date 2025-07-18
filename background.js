@@ -9,17 +9,18 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === "open_tab") {
-    const repoUrl = message.url;
+    const retry = message.retry
+    const repoUrl = `${message.url}&retry=${retry}`;
     const senderTab = sender.tab;
     const senderWindowId = senderTab ? senderTab.windowId : null;
 
-    console.log("Opening repo:", repoUrl);
+    console.log(`${retry ? "Retrying" : "Opening"} repo:`, repoUrl);
 
     try {
       const tab = await createTabSafe({
         url: repoUrl,
         active: false,
-        ...(senderWindowId ? { windowId: senderWindowId } : {}),
+        ...(senderWindowId ? { windowId: senderWindowId } : {})
       });
 
       const timeoutId = setTimeout(() => {
@@ -29,6 +30,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
           type: "star_result",
           success: false,
           repo: new URL(repoUrl).pathname.slice(1),
+          retry
         });
 
         // Close tab timeout
@@ -53,6 +55,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         type: "star_result",
         success: false,
         repo: new URL(repoUrl).pathname.slice(1),
+        retry
       });
     }
   }
