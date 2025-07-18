@@ -10,6 +10,7 @@ const textProcess = document.getElementById("process");
 const textSuccess = document.getElementById("success");
 const textFail = document.getElementById("fail");
 const retryAllBtn = document.getElementById("btn-retry-all");
+let isSearching = false;
 let listUnChecked = [];
 let repoFails = [];
 let playStarring = false;
@@ -38,6 +39,7 @@ const updateUIProcess = (reset = false) => {
 submitBtn.onclick = async (event) => {
   event.preventDefault();
 
+  setStateSearching(true);
   setStatePlayStarring(false);
   repoFails = [];
   rowProcessing = 0;
@@ -109,6 +111,8 @@ submitBtn.onclick = async (event) => {
   } catch (err) {
     console.log(err);
     statusEl.textContent = "Failed to fetch repositories.";
+  } finally {
+    setStateSearching(false);
   }
 };
 
@@ -251,6 +255,11 @@ checkboxSelectAllRepo.addEventListener("change", (e) => {
     cb.checked = e.target.checked;
   });
 });
+
+const setStateSearching = (status) => {
+  isSearching = status
+  submitBtn.disabled = status
+}
 
 const setStatePlayStarring = (status) => {
   playStarring = status;
