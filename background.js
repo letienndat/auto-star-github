@@ -1,6 +1,16 @@
 const timeout = 30;
 const pendingTabs = {};
 
+const sendMessage = (status, value, retry) => {
+  chrome.runtime.sendMessage({
+    type: "star_result",
+    success: status,
+    repo: new URL(repoUrl).pathname.slice(1),
+    value,
+    retry,
+  });
+};
+
 chrome.action.onClicked.addListener((tab) => {
   chrome.tabs.create({
     url: chrome.runtime.getURL("index.html"),
@@ -24,14 +34,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       });
 
       const timeoutId = setTimeout(() => {
-        console.log(`Timeout: No response from repo ${repoUrl}, tab ${tab.id}`);
-
-        chrome.runtime.sendMessage({
-          type: "star_result",
-          success: false,
-          repo: new URL(repoUrl).pathname.slice(1),
-          retry,
-        });
+        let value = `Timeout: No response from repo ${repoUrl}, tab ${tab.id}`
+        sendMessage(false, value, retry)
 
         // Close tab timeout
         chrome.tabs.remove(tab.id, () => {
@@ -50,13 +54,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
       pendingTabs[tab.id] = timeoutId;
     } catch (err) {
-      console.log("Failed to create tab:", err.message);
-      chrome.runtime.sendMessage({
-        type: "star_result",
-        success: false,
-        repo: new URL(repoUrl).pathname.slice(1),
-        retry,
-      });
+      let value = `Failed to create tab: ${err.message}`
+      sendMessage(false, value, retry)
     }
   }
 

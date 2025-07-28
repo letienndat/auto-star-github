@@ -289,6 +289,9 @@ const tapCheckbox = (e) => {
 };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  let value = message.value ?? ""
+  console.log(`Message: ${value}`)
+
   if (message.type === "star_result" && playStarring) {
     const { repo, success, retry } = message;
 

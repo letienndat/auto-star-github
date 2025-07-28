@@ -1,9 +1,10 @@
-const response = (status, retry) => {
+const sendMessage = (status, message, retry) => {
   chrome.runtime.sendMessage(
     {
       type: "star_result",
       success: status,
       repo: window.location.pathname.slice(1),
+      message,
       retry,
     },
     () => {
@@ -21,15 +22,15 @@ const response = (status, retry) => {
 
   const form = document.querySelector('form[action$="/star"]');
   if (!form) {
-    console.log("❌ Star form not found.");
-    response(false, retry);
+    let message = "Star form not found."
+    sendMessage(false, message, retry);
     return;
   }
 
   const tokenInput = form.querySelector('input[name="authenticity_token"]');
   if (!tokenInput) {
-    console.log("❌ authenticity_token not found.");
-    response(false, retry);
+    let message = "authenticity_token not found."
+    sendMessage(false, message, retry);
     return;
   }
 
@@ -48,14 +49,14 @@ const response = (status, retry) => {
     });
 
     if (res.ok) {
-      console.log("✅ Repo starred.");
-      response(true, retry);
+      let message = "Repo starred."
+      sendMessage(true, message, retry);
     } else {
-      console.log("❌ Star failed.");
-      response(false, retry);
+      let message = "Star failed."
+      sendMessage(false, message, retry);
     }
   } catch (err) {
-    console.log("❌ Network error:", err);
-    response(false, retry);
+    let message = `Network error: ${err}`
+    sendMessage(false, message, retry);
   }
 })();
